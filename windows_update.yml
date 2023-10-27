@@ -1,0 +1,26 @@
+---
+- name: Update Windows 10 and Windows Server
+  hosts: inventory2 #windows nodes list
+  gather_facts: no
+  tasks:
+    - name: Check for available updates
+      win_updates:
+        category_names:
+          - "CriticalUpdates"
+          - "SecurityUpdates"
+          - "UpdateRollups"
+        state: "search"
+      register: available_updates
+
+    - name: Install available updates
+      win_updates:
+        category_names:
+          - "CriticalUpdates"
+          - "SecurityUpdates"
+          - "UpdateRollups"
+        state: "installed"
+      when: available_updates.updated
+
+    - name: Reboot if updates were installed
+      win_reboot:
+      when: available_updates.reboot_required
