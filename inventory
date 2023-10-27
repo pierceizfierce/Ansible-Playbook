@@ -1,5 +1,5 @@
 #Create the Inventory
 
-pierceizfierce@10.0.0.25
-pierceizfierce@10.0.0.26
-pierceizfierce@10.0.0.27
+pierceizfierce@10.0.0.25 apache_package=apache2 php_package=libapache2-mod-php
+pierceizfierce@10.0.0.26 apache_package=apache2 php_package=libapache2-mod-php
+pierceizfierce@10.0.0.27 apache_package=apache2 php_package=libapache2-mod-php
