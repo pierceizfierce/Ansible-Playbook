@@ -1,0 +1,61 @@
+---
+- name: Configure Cisco Catalyst Switch
+  hosts: catalyst_switch
+  gather_facts: no
+  tasks:
+    - name: Set Hostname
+      ios_config:
+        lines:
+          - hostname {{ inventory_hostname }}
+      delegate_to: localhost
+
+    - name: Configure VLANs
+      ios_vlan:
+        vlan_id: "{{ item.id }}"
+        name: "{{ item.name }}"
+        state: present
+      with_items:
+        - { id: 10, name: "VLAN10" }
+        - { id: 20, name: "VLAN20" }
+        # Add all 13 VLANs here
+
+    - name: Configure RSTP
+      ios_spanning_tree:
+        mode: rapid-pvst
+      delegate_to: localhost
+
+    - name: Configure Interfaces
+      ios_interface:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        state: present
+      with_items:
+        - { name: "GigabitEthernet1/0/1", description: "Trunk Link to Host1" }
+        - { name: "GigabitEthernet1/0/2", description: "Trunk Link to Host2" }
+        # Add all 7 interfaces per VLAN
+
+    - name: Configure Port-Channels
+      ios_interface:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        mode: "access"
+        access_vlan: "{{ item.vlan }}"
+        state: present
+      with_items:
+        - { name: "Port-channel1", description: "Port-Channel 1", vlan: 10 }
+        - { name: "Port-channel2", description: "Port-Channel 2", vlan: 20 }
+        # Add all 3 port-channels
+
+    - name: Configure Trunk Links
+      ios_interface:
+        name: "{{ item.name }}"
+        description: "{{ item.description }}"
+        mode: "trunk"
+        trunk_allowed_vlans: all
+        state: present
+      with_items:
+        - { name: "GigabitEthernet1/0/3", description: "Trunk to Switch1" }
+        - { name: "GigabitEthernet1/0/4", description: "Trunk to Switch2" }
+        - { name: "GigabitEthernet1/0/5", description: "Trunk to Switch3" }
+
+# Add more tasks for specific switch configurations if needed

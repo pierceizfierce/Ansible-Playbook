@@ -1,0 +1,77 @@
+- name: Install AD DS Role
+  hosts: domain_controllers
+  gather_facts: no
+  tasks:
+    - name: Install AD DS Role
+      win_feature:
+        name: AD-Domain-Services
+        state: present
+- name: Promote to Domain Controller
+  hosts: domain_controllers
+  gather_facts: no
+  tasks:
+    - name: Promote to Domain Controller
+      win_shell: |
+        Install-ADDSForest -DomainName "example.com" -SafeModeAdministratorPassword (ConvertTo-SecureString "YourPassword" -AsPlainText -Force) -Force
+      vars:
+        ansible_user: Administrator
+        ansible_password: YourAdministratorPassword
+- name: Join Member Servers to Domain
+  hosts: member_servers
+  gather_facts: no
+  tasks:
+    - name: Join Server to Domain
+      win_domain_membership:
+        name: example.com
+        state: domain
+        dns_domain_name: example.com
+        dns_servers:
+          - 192.168.1.2  # IP of one of the domain controllers
+        username: Administrator
+        password: YourAdministratorPassword
+
+- name: Create Group Policy Object
+  hosts: domain_controllers
+  gather_facts: no
+  tasks:
+    - name: Create GPO
+      win_shell: |
+        $GPOName = "MyGPO"  # Specify your GPO name
+        $OU = "OU=YourOU,DC=example,DC=com"  # Specify the Organizational Unit (OU) where you want to link the GPO
+
+        New-GPO -Name $GPOName
+        $GPO = Get-GPO -Name $GPOName
+        New-GPLink -Name $GPOName -Target $OU -LinkEnabled Yes
+      become: yes
+      become_user: Administrator  # Use an account with sufficient AD permissions
+      become_method: runas
+
+- name: Apply GPO
+  hosts: domain_controllers
+  gather_facts: no
+  tasks:
+    - name: Apply GPO to an OU
+      win_shell: |
+        $GPOName = "MyGPO"  # Specify your GPO name
+        $OU = "OU=YourOU,DC=example,DC=com"  # Specify the OU to which you want to link the GPO
+
+        Invoke-GPUpdate -Force
+      become: yes
+      become_user: Administrator  # Use an account with sufficient AD permissions
+      become_method: runas
+
+- name: Configure DNS on Windows Servers
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Set DNS Server Address
+      win_dns_client:
+        adapter_names:
+          - Ethernet  # Adapt this to match your network interface name
+        ipv4_addresses:
+          - 192.168.1.2  # Replace with the desired DNS server IP address
+        register: dns_client_result
+
+    - name: Verify DNS Configuration
+      debug:
+        var: dns_client_result

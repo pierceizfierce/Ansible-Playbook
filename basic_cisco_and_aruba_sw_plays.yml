@@ -1,0 +1,97 @@
+---
+- name: Initial Switch Configuration
+  hosts: switches
+  gather_facts: no
+  become: yes
+  tasks:
+    - name: Configure Cisco Switch
+      network_cli:
+        host: "{{ inventory_hostname }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        authorize: yes
+        auth_pass: "{{ ansible_become_pass }}"
+        platform: cisco_ios
+        lines:
+          - name: Set hostname
+            config: hostname {{ switch_hostname }}
+          - name: Configure Management Interface
+            config: |
+              interface Vlan1
+                ip address {{ management_ip }} {{ subnet_mask }}
+            wait_for: result.stdout | regex("ip address {{ management_ip }} {{ subnet_mask }}")
+          - name: Enable SSH
+            config: |
+              ip domain-name {{ domain_name }}
+              crypto key generate rsa modulus 2048
+              ip ssh version 2
+              line vty 0 15
+                transport input ssh
+                login local
+            wait_for: result.stdout | regex("crypto key generate rsa modulus 2048")
+          - name: Set NTP
+            config: |
+              clock set {{ ntp_time }}
+              ntp server {{ ntp_server }}
+            wait_for: result.stdout | regex("ntp server {{ ntp_server }}")
+          - name: Configure VLANs
+            config: |
+              vlan {{ vlan_id }}
+                name {{ vlan_name }}
+          - name: Assign VLAN to Interface
+            config: |
+              interface {{ interface_range }}
+                switchport mode access
+                switchport access vlan {{ vlan_id }}
+      when: "switch_type == 'cisco'"
+
+    - name: Configure Aruba Switch
+      arubaos_switch:
+        provider:
+          host: "{{ inventory_hostname }}"
+          username: "{{ ansible_user }}"
+          password: "{{ ansible_password }}"
+          ssh_keyfile: "{{ ansible_ssh_private_key_file }}"
+          auth_prompt: "User:"
+          ssh_key_enable: yes
+          timeout: 10
+        commands:
+          - command_string: "configure terminal"
+            wait_for: "switch(config)#"
+          - command_string: "hostname {{ switch_hostname }}"
+            wait_for: "switch(config)#"
+          - command_string: "vlan {{ vlan_id }}"
+            wait_for: "switch(config-vlan-{{ vlan_id }})#"
+          - command_string: "name {{ vlan_name }}"
+            wait_for: "switch(config-vlan-{{ vlan_id }})#"
+          - command_string: "interface {{ interface_name }}"
+            wait_for: "switch(config-if-{{ interface_name }})#"
+          - command_string: "switchport mode access"
+            wait_for: "switch(config-if-{{ interface_name }})#"
+          - command_string: "switchport access vlan {{ vlan_id }}"
+            wait_for: "switch(config-if-{{ interface_name }})#"
+      when: "switch_type == 'aruba'"
+
+  vars:
+    switch_type: "cisco"  # Set to "aruba" for Aruba switches
+    switch_hostname: "MySwitch"
+    management_ip: "192.168.1.1"
+    subnet_mask: "255.255.255.0"
+    domain_name: "example.com"
+    ntp_time: "13:00:00 Jan 1 2023"
+    ntp_server: "ntp.example.com"
+    vlan_id: 10
+    vlan_name: "DataVLAN"
+    interface_range: "range Gi1/0/1 - 24"
+
+  handlers:
+    - name: Save Cisco Configuration
+      network_cli:
+        host: "{{ inventory_hostname }}"
+        username: "{{ ansible_user }}"
+        password: "{{ ansible_password }}"
+        authorize: yes
+        auth_pass: "{{ ansible_become_pass }}"
+        platform: cisco_ios
+        save_when: modified
+      when: "switch_type == 'cisco'"

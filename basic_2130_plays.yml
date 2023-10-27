@@ -1,0 +1,105 @@
+---
+- name: Configure Cisco NGFW
+  hosts: cisco_ngfw
+  gather_facts: no
+  tasks:
+    - name: Configure Access Control Policy
+      cisco_asa_acp:
+        state: present
+        name: "Initial Allow for vlans"
+        rules:
+          - action: permit
+            source: "10.0.0.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.1.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.2.0/24"
+            destination: "any"
+            service: "any"
+
+    - name: Configure NAT Policy
+      cisco_asa_nat:
+        state: present
+        type: "static"
+        source: "any"
+        destination: "any"
+        translated_source: "interface"
+        translated_destination: "original"
+        nat_id: "1"
+        acl_name: "Initial Allow for vlans"
+
+    - name: Apply Access Control Policy
+      cisco_asa_acl:
+        state: present
+        name: "inside"
+        rules:
+          - action: permit
+            source: "10.0.0.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.1.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.2.0/24"
+            destination: "any"
+            service: "any"
+        acl_type: "extended"
+---
+- name: Configure Cisco NGFW
+  hosts: cisco_ngfw
+  gather_facts: no
+  tasks:
+    - name: Configure Access Control Policy
+      cisco_asa_acp:
+        state: present
+        name: "BestPracticePolicy"
+        rules:
+          - action: permit
+            source: "10.0.0.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.1.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.2.0/24"
+            destination: "any"
+            service: "any"
+
+    - name: Configure NAT Policy
+      cisco_asa_nat:
+        state: present
+        type: "static"
+        source: "any"
+        destination: "any"
+        translated_source: "interface"
+        translated_destination: "original"
+        nat_id: "1"
+        acl_name: "BestPracticePolicy"
+
+    - name: Apply Access Control Policy
+      cisco_asa_acl:
+        state: present
+        name: "inside"
+        rules:
+          - action: permit
+            source: "10.0.0.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.1.0/24"
+            destination: "any"
+            service: "any"
+          - action: permit
+            source: "10.0.2.0/24"
+            destination: "any"
+            service: "any"
+        acl_type: "extended"
+

@@ -1,0 +1,51 @@
+---
+- name: Create and Update Windows Servers
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Install Windows Updates
+      win_updates:
+        category_names:
+          - SecurityUpdates
+          - CriticalUpdates
+        state: installed
+      when: inventory_hostname in groups['windows_servers']
+
+- name: Create Windows Servers
+  hosts: localhost
+  connection: local
+  tasks:
+    - name: Generate the list of server names
+      set_fact:
+        server_names: "{{ range(1, 21)|list }}"
+
+    - name: Add server names to the Ansible inventory
+      add_host:
+        name: "server{{ item }}"
+        ansible_host: server{{ item }}.yourdomain.com  # Replace with actual server addresses
+        ansible_user: your_username                 # Replace with your username
+        ansible_password: your_password             # Replace with your password
+        ansible_port: 5986
+        ansible_connection: winrm
+        ansible_winrm_server_cert_validation: ignore
+      with_items: "{{ server_names }}"
+
+- name: Configure Static IP Addresses on Windows Servers
+  hosts: windows_servers
+  gather_facts: no
+  tasks:
+    - name: Set Static IP Address
+      win_shell: |
+        $IPAddress = "0.0.0.{{ item }}"
+        $SubnetMask = "255.255.255.0"
+        $DefaultGateway = "0.0.0.0"  # Replace with your actual default gateway
+        $DNS = "0.0.0.0"  # Replace with your DNS server
+
+        $NIC = Get-NetAdapter | Where-Object {$_.InterfaceAlias -eq "Ethernet"}
+        $NICConfig = Get-NetIPInterface -InterfaceAlias $NIC.InterfaceAlias
+        $NICConfig | ForEach-Object {
+            $_ | Set-NetIPInterface -Dhcp Disabled
+            $_ | New-NetIPAddress -IPAddress $IPAddress -PrefixLength 24 -DefaultGateway $DefaultGateway
+            Set-DnsClientServerAddress -InterfaceIndex $NIC.Index -ServerAddresses $DNS
+        }
+      with_sequence: start=1 end=20

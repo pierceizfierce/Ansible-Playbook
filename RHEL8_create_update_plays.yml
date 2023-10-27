@@ -1,0 +1,40 @@
+- name: Create and Update RHEL 8 Servers
+  hosts: #insure youre using correct inventory file
+  become: yes
+  tasks:
+    - name: Update the package cache
+      dnf:
+        name: '*'
+        state: latest
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install necessary packages
+      dnf:
+        name: "{{ item }}"
+        state: present
+      loop:
+        - epel-release
+        - python3-pip
+      when: ansible_os_family == 'RedHat'
+
+    - name: Ensure Python 3 is installed
+      raw: test -e /usr/bin/python3 || (dnf install -y python3 && alternatives --set python >
+      when: ansible_os_family == 'RedHat'
+
+    - name: Install required Python packages
+      pip:
+        name:
+          - ansible
+          - openstacksdk
+      when: ansible_os_family == 'RedHat'
+    - name: Create a directory for your playbook files
+      file:
+        path: #/path/to/playbook_directory
+        state: directory
+
+    - name: Copy playbook files to the remote servers
+      copy:
+        src: #/path/to/your/playbook/files
+        dest: #/path/to/playbook_directory/
+    - name: Run the playbook to create and update the servers
+      command: ansible-playbook -i .ini #/path/to/playbook_directory/your_playbook.yml
