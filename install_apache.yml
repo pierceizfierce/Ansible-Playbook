@@ -4,19 +4,31 @@
   become: true
   tasks:
 
+
+#Ubuntu and Debian
   - name: update repo index
     apt:
       update_cache: yes
     when: ansible_distribution in ["Ubuntu", "Debian"]
 
-  - name: install apache2 package
+  - name: install apache2 and php package
     apt:
-      name: apache2
+      name:
+        - apache2
+        - libapache2-mod-php
       state: latest
-    when: ansible_distribution == "Ubuntu"
+    when: ansible_distribution in ["Ubuntu", "Debian"]
 
-  - name: add php support for apache
+#CentOS
+  - name: update repo index
     apt:
-      name: libapache2-mod-php
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install apache2 and php package
+    apt:
+      name:
+        - httpd
+        - php
       state: latest
-    when: ansible_distribution == "Ubuntu"
+    when: ansible_distribution == "CentOS"
