@@ -54,10 +54,9 @@ Getting Started
 Prerequisites
 Before using the playbooks in this repository, ensure that you have the following prerequisites installed:
 
-'''Ansible: You must have Ansible installed on your local machine or the control node. You can install Ansible by following the instructions in the official Ansible documentation.
+Ansible: You must have Ansible installed on your local machine or the control node. You can install Ansible by following the instructions in the official Ansible documentation.
 Installation
 Clone this repository to your local machine:
-'''
 
 '''bash
 git clone https://github.com/your-username/ansible-playbook-branch.git
