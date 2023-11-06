@@ -17,7 +17,7 @@ Repository Structure
 The repository is organized as follows:
 
 '''bash
-Copy code
+
 ansible-playbook-branch/
 │
 ├── playbooks/               # Ansible playbooks
