@@ -16,8 +16,8 @@ This repository is intended to assist in automating system configurations, appli
 Repository Structure
 The repository is organized as follows:
 
-bash
-Copy code
+'''bash
+
 ansible-playbook-branch/
 │
 ├── playbooks/               # Ansible playbooks
@@ -48,6 +48,7 @@ ansible-playbook-branch/
 ├── README.md                # This file
 ├── LICENSE                  # Project license
 └── ...
+'''
 
 Getting Started
 Prerequisites
@@ -57,13 +58,11 @@ Ansible: You must have Ansible installed on your local machine or the control no
 Installation
 Clone this repository to your local machine:
 
-bash
-Copy code
+'''bash
 git clone https://github.com/your-username/ansible-playbook-branch.git
 Navigate to the repository directory:
-
-bash
-Copy code
+'''
+'''bash
 cd ansible-playbook-branch
 Usage
 Create an inventory file in the inventories/ directory, or use the existing ones.
@@ -71,12 +70,11 @@ Create an inventory file in the inventories/ directory, or use the existing ones
 Edit the group and host variables in the group_vars/ and host_vars/ directories as needed for your environment.
 
 Execute the desired playbook using the following command:
-
-bash
-Copy code
+'''
+'''bash
 ansible-playbook -i inventories/your-inventory-file playbook1.yml
 Replace your-inventory-file and playbook1.yml with the appropriate values.
-
+'''
 Contributing
 We welcome contributions from the community. If you want to contribute to this repository, please follow these guidelines:
 
