@@ -5,14 +5,13 @@
   tasks:
 
 
-#Ubuntu and Debian
+#Any Linux OS
 
   - name: install apache and php package
     package:
-       name:
-        - "{{ apache_package }}"
-        - "{{ php_package }}"
-       state: latest
-       update_cache: yes
-
+      name:
+         - "{{ apache_package }}"
+         - "{{ php_package }}"
+      state: latest
+      update_cache: yes
 
