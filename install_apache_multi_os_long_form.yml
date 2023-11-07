@@ -1,7 +1,7 @@
 ---
 #use this when there are specific OS's to target
 
-- host: all
+- hosts: all
   become: true
   tasks:
 
@@ -23,7 +23,6 @@
     when: ansible_distribution == ["Ubuntu"]
 
 
-
   - name: update repo index
     dnf:
       update_cache: yes
@@ -33,11 +32,11 @@
     dnf:
        name: httpd
        state: latest
-    when: ansible_distribution in ["Ubuntu"]
+    when: ansible_distribution in ["CentOS"]
 
   - name: add php support for apache
     dnf:
       name: php
       state: latest
-    when: ansible_distribution == ["Ubuntu"]
+    when: ansible_distribution == ["CentOS"]
 
