@@ -1,0 +1,42 @@
+---
+#use this when there are specific OS's to target
+
+- hosts: all
+  become: true
+  tasks:
+
+  - name: install updates for CentOS
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates for Ubuntu
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+   - name: Update Ubuntu and Install Apache/PHP
+     apt:
+       name:
+         - apache2
+         - libapache2-mod-php
+       state: latest
+       update_cache: yes
+     when: ansible_distribution in ["Debian","Ubuntu"]
+
+   - name: update CentOS and install apache/php
+     dnf:
+        name:
+           - httpd
+           - php
+        state: latest
+        update_cache: yes
+     when: ansible_distribution == "CentOS"
+

@@ -1,5 +1,12 @@
 #server Nodes
 
+[web_servers]
 pierceizfierce@10.0.0.33
+
+[db_servers]
 pierceizfierce@10.0.0.34
+
+[file_servers]
 pierceizfierce@10.0.0.35
+
+#can have servers apart of multiple groups
