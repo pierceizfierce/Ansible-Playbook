@@ -3,7 +3,7 @@
 
 - hosts: all
   become: true
-  pre_tasks: #pre_tasks mandates these tasks are done first, tasks will execute from top down
+  pre_tasks: #"pre_tasks" mandates these tasks are done first, tasks will execute from top down
 
   - name: install updates for CentOS
     dnf:
@@ -45,7 +45,7 @@
   become: true
   tasks:
 
-  - name: install mariadb  for CentOS
+  - name: install mariaDB  for CentOS
     dnf:
       name: mariadb
       state: latest
