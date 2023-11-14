@@ -1,0 +1,75 @@
+---
+#use this when there are specific OS's to target
+
+- hosts: all
+  become: true
+  pre_tasks: #"pre_tasks" mandates these tasks are done first, tasks will execute from top down
+
+  - name: install updates for CentOS
+    tags: always
+    dnf:
+      update_only: yes
+      update_cache: yes
+    when: ansible_distribution == "CentOS"
+
+  - name: install updates for Ubuntu
+    tags: always
+    apt:
+      upgrade: dist
+      update_cache: yes
+    when: ansible_distribution == "Ubuntu"
+
+
+- hosts: web_servers
+  become: true
+  tasks:
+
+   - name: Update Ubuntu and Install Apache/PHP
+     tags: apache, apache2, ubuntu
+     apt:
+       name:
+         - apache2
+         - libapache2-mod-php
+       state: latest
+       update_cache: yes
+     when: ansible_distribution in ["Debian","Ubuntu"]
+
+   - name: update CentOS and install apache/php
+     tags: apache, centos, httpd
+     dnf:
+        name:
+           - httpd
+           - php
+        state: latest
+        update_cache: yes
+     when: ansible_distribution == "CentOS"
+
+
+- hosts: db_servers
+  become: true
+  tasks:
+
+  - name: install mariaDB  for CentOS
+    tags: centos, db, mariadb
+    dnf:
+      name: mariadb
+      state: latest
+    when: ansible_distribution == "CentOS"
+
+  - name: install mariaDB for Ubuntu
+    tags: db, mariadb, ubuntu
+    apt:
+      name: mariadb-server
+      state: latest
+    when: ansible_distribution == "Ubuntu"
+
+- hosts: file_servers
+  become: true
+  tasks:
+
+  - name: install samba package
+    tags: samba 
+    package:
+       name: samba
+       state: latest
+
