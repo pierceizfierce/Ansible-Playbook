@@ -10,3 +10,6 @@ pierceizfierce@10.0.0.34
 pierceizfierce@10.0.0.35
 
 #can have servers apart of multiple groups
+
+[workstations]
+10.0.0.39
